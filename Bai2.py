@@ -11,8 +11,8 @@ def evaluate(dataloader: DataLoader, model = nn.Module) -> dict:
     predictions = []
     trues = []
     for items in dataloader:
-        image: torch.Tensor = items["image"].to("cpu")
-        label: torch.Tensor = items["label"].to("cpu")
+        image: torch.Tensor = items["image"].to("gpu")
+        label: torch.Tensor = items["label"].to("gpu")
         output: torch.Tensor = model(image)
         output = torch.argmax(output, dim=-1)
         predictions.extend(output.tolist())
@@ -43,7 +43,7 @@ if __name__ == "__main__":
         collate_fn=collate_fn
     )
 
-    model = GoogLeNet().to("cpu")
+    model = GoogLeNet().to("gpu")
     loss_fn = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=0.001)
 
@@ -56,8 +56,8 @@ if __name__ == "__main__":
         model.train()
 
         for items in train_dataloader:
-            images: torch.Tensor = items["image"].to("cpu")
-            labels: torch.Tensor = items["label"].to("cpu")
+            images: torch.Tensor = items["image"].to("gpu")
+            labels: torch.Tensor = items["label"].to("gpu")
 
            # forward pass
             outputs = model(images)
@@ -88,5 +88,6 @@ if __name__ == "__main__":
 
 
        
+
 
 
