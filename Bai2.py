@@ -45,7 +45,7 @@ if __name__ == "__main__":
 
     model = GoogLeNet().to("cuda")
     loss_fn = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(model.parameters(), lr=0.001)
+    optimizer = optim.Adam(model.parameters(), lr=0.01)
 
     num_epochs = 10
     best_score = 0
@@ -88,6 +88,7 @@ if __name__ == "__main__":
 
 
        
+
 
 
 
