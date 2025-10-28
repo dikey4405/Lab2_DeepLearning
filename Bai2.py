@@ -26,8 +26,8 @@ def evaluate(dataloader: DataLoader, model = nn.Module) -> dict:
 
 if __name__ == "__main__":
 
-    train_dataset = VinaFood("Lab2_DeepLearning/dataset/VinaFood21/train")
-    test_dataset  = VinaFood("Lab2_DeepLearning/dataset/VinaFood21/test")
+    train_dataset = VinaFood("/kaggle/input/dataset-for-lab2/train")
+    test_dataset  = VinaFood("/kaggle/input/dataset-for-lab2/test")
 
     train_dataloader = DataLoader(
         dataset=train_dataset,
@@ -88,3 +88,4 @@ if __name__ == "__main__":
 
 
        
+
