@@ -26,8 +26,8 @@ def evaluate(dataloader: DataLoader, model = nn.Module) -> dict:
 
 if __name__ == "__main__":
 
-    train_dataset = VinaFood("D:/Deep_Learning/notebooks/ThucHanh/Lab2/dataset/VinaFood21/train")
-    test_dataset  = VinaFood("D:/Deep_Learning/notebooks/ThucHanh/Lab2/dataset/VinaFood21/test")
+    train_dataset = VinaFood("Lab2_DeepLearning/dataset/VinaFood21/train")
+    test_dataset  = VinaFood("Lab2_DeepLearning/dataset/VinaFood21/test")
 
     train_dataloader = DataLoader(
         dataset=train_dataset,
@@ -85,5 +85,6 @@ if __name__ == "__main__":
                 model.state_dict(),
                 "checkpoint/googlenet/best_model.pth"
             )
+
 
        
