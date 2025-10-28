@@ -35,9 +35,9 @@ class VinaFood(Dataset):
                 label_id += 1
 
             for image_file in os.listdir(os.path.join(path, folder)):
-                image = cv.imread(os.path.join(path, folder, image_file))
+                image_path = os.path.join(path, folder, image_file)
                 data.append({
-                    "image_path": image,
+                    "image_path": image_path,
                     "label": label
                 })
         
@@ -49,8 +49,10 @@ class VinaFood(Dataset):
 
     def __getitem__(self, index: int) -> dict:
         item = self.data[index]
-        image = item["image"]
+        image_path = item["image_path"]
         label = item["label"]
+
+        image = cv.imread(image_path)
 
         image = cv.cvtColor(image, cv.COLOR_BGR2RGB)
         image = cv.resize(image, (224, 224))
@@ -62,5 +64,4 @@ class VinaFood(Dataset):
             "image": image,
             "label": label_id
         }
-
 
