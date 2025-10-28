@@ -35,7 +35,7 @@ class VinaFood(Dataset):
                 label_id += 1
 
             for image_file in os.listdir(os.path.join(path, folder)):
-                image = cv.imread(os.path.join(path, folder, image_file)
+                image = cv.imread(os.path.join(path, folder, image_file))
                 data.append({
                     "image_path": image,
                     "label": label
@@ -62,4 +62,5 @@ class VinaFood(Dataset):
             "image": image,
             "label": label_id
         }
+
 
