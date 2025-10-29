@@ -43,7 +43,7 @@ if __name__ == "__main__":
         collate_fn=collate_fn
     )
 
-    model = ResNet(block=ResidualBlock, layers=[2, 2, 2, 2], num_classes=21).to("cpu")
+    model = ResNet(block=ResidualBlock, num_blocks=[2, 2, 2, 2], num_classes=21).to("cpu")
     loss_fn = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=0.001)
 
@@ -85,5 +85,6 @@ if __name__ == "__main__":
                 model.state_dict(),
                 "checkpoint/resnet/best_model.pth"
             )
+
 
        
