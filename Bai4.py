@@ -1,0 +1,124 @@
+from VinaFood_dataset import VinaFood, collate_fn
+import torch
+from torch.utils.data import DataLoader
+from torch import nn, optim
+import numpy as np
+from sklearn.metrics import precision_score, recall_score, f1_score
+from model.pretrained_resnet import PretrainedResnet
+import os
+
+
+def evaluate(dataloader: DataLoader, model: nn.Module, device: torch.device) -> dict:
+    model.eval()
+    predictions = []
+    trues = []
+    with torch.no_grad():
+        for items in dataloader:
+            image: torch.Tensor = items["image"].to(device)
+            label: torch.Tensor = items["label"].to(device)
+            output: torch.Tensor = model(image)
+            output = torch.argmax(output, dim=-1)
+            predictions.extend(output.cpu().tolist())
+            trues.extend(label.cpu().tolist())
+
+    return {
+        "precision": precision_score(trues, predictions, average="macro", zero_division=0),
+        "recall": recall_score(trues, predictions, average="macro", zero_division=0),
+        "f1": f1_score(trues, predictions, average="macro", zero_division=0)
+    }
+
+
+if __name__ == "__main__":
+
+    # Use local dataset paths (adjust if running on Kaggle)
+    train_dataset = VinaFood("dataset/VinaFood21/train")
+    test_dataset = VinaFood("dataset/VinaFood21/test")
+
+    train_dataloader = DataLoader(
+        dataset=train_dataset,
+        batch_size=16,
+        shuffle=True,
+        collate_fn=collate_fn,
+        num_workers=2,
+        pin_memory=True,
+    )
+
+    test_dataloader = DataLoader(
+        dataset=test_dataset,
+        batch_size=32,
+        shuffle=False,
+        collate_fn=collate_fn,
+        num_workers=2,
+        pin_memory=True,
+    )
+
+    # Device
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print(f"Using device: {device}")
+
+    # Model: allow number of classes to be derived from dataset
+    num_classes = len(train_dataset.labels_to_names) if hasattr(train_dataset, 'labels_to_names') else 21
+    model = PretrainedResnet(num_classes=num_classes).to(device)
+
+    # Loss and optimizer: split lr for backbone and classifier
+    loss_fn = nn.CrossEntropyLoss()
+    base_lr = 1e-3
+    optimizer = optim.Adam([
+        {"params": model.resnet.parameters(), "lr": base_lr * 0.1},
+        {"params": model.classifier.parameters(), "lr": base_lr},
+    ])
+
+    scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=7, gamma=0.1)
+
+    num_epochs = 10
+    best_score = 0.0
+    best_ckpt = None
+    out_dir = "checkpoint/bai4"
+    os.makedirs(out_dir, exist_ok=True)
+
+    for epoch in range(num_epochs):
+        losses = []
+        print(f"Epoch {epoch+1}/{num_epochs}")
+        model.train()
+
+        for items in train_dataloader:
+            images: torch.Tensor = items["image"].to(device)
+            labels: torch.Tensor = items["label"].to(device)
+
+            # forward pass
+            outputs = model(images)
+            loss = loss_fn(outputs, labels)
+
+            # backward pass
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+
+            # append loss for later verbose
+            losses.append(loss.item())
+
+        scheduler.step()
+
+        avg_loss = float(np.array(losses).mean()) if len(losses) > 0 else 0.0
+        print(f"\t- loss: {avg_loss:.6f}")
+
+        scores = evaluate(test_dataloader, model, device)
+
+        for score_name in scores:
+            print(f"\t-{score_name}: {scores[score_name]:.6f}")
+
+        current_score = scores["f1"]
+        if current_score > best_score:
+            best_score = current_score
+            best_ckpt = os.path.join(out_dir, f"best_epoch_{epoch+1}_f1_{best_score:.4f}.pth")
+            torch.save({
+                "epoch": epoch + 1,
+                "model_state_dict": model.state_dict(),
+                "optimizer_state_dict": optimizer.state_dict(),
+                "f1": best_score,
+            }, best_ckpt)
+            print(f"New best model saved: {best_ckpt}")
+
+    print(f"Training finished. Best F1: {best_score:.4f}")
+
+       
