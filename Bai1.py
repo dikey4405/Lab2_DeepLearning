@@ -27,13 +27,13 @@ def evaluate(dataloader: DataLoader, model = nn.Module) -> dict:
 if __name__ == "__main__":
 
     train_dataset = MnistDataset(
-    image_path="D:/Deep_Learning/notebooks/ThucHanh/Lab2/dataset/Mnist/train-images-idx3-ubyte",
-    label_path="D:/Deep_Learning/notebooks/ThucHanh/Lab2/dataset/Mnist/train-labels-idx1-ubyte"
+    image_path="/kaggle/input/mnist_for_lab2/Mnist/train-images-idx3-ubyte",
+    label_path="/kaggle/input/mnist_for_lab2/Mnist/train-labels-idx1-ubyte"
 )
 
     test_dataset = MnistDataset(
-        image_path="D:/Deep_Learning/notebooks/ThucHanh/Lab2/dataset/Mnist/t10k-images-idx3-ubyte",
-        label_path="D:/Deep_Learning/notebooks/ThucHanh/Lab2/dataset/Mnist/t10k-labels-idx1-ubyte" 
+        image_path="/kaggle/input/mnist_for_lab2/Mnist/t10k-images-idx3-ubyte",
+        label_path="/kaggle/input/mnist_for_lab2/Mnist/t10k-labels-idx1-ubyte" 
     )
 
     train_dataloader = DataLoader(
@@ -92,5 +92,6 @@ if __name__ == "__main__":
                 model.state_dict(),
                 "checkpoint/lenet/best_model.pth"
             )
+
 
        
