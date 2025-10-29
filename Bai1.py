@@ -1,4 +1,4 @@
-from dataset.mnist_dataset import MnistDataset, collate_fn
+from mnist_dataset import MnistDataset, collate_fn
 import torch
 from torch.utils.data import DataLoader
 from torch import nn, optim
@@ -95,4 +95,5 @@ if __name__ == "__main__":
 
 
        
+
 
