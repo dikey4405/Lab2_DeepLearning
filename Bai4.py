@@ -31,8 +31,8 @@ def evaluate(dataloader: DataLoader, model: nn.Module, device: torch.device) -> 
 if __name__ == "__main__":
 
     # Use local dataset paths (adjust if running on Kaggle)
-    train_dataset = VinaFood("dataset/VinaFood21/train")
-    test_dataset = VinaFood("dataset/VinaFood21/test")
+    train_dataset = VinaFood("/kaggle/input/dataset-for-lab2/VinaFood21/train")
+    test_dataset = VinaFood("/kaggle/input/dataset-for-lab2/VinaFood21/test")
 
     train_dataloader = DataLoader(
         dataset=train_dataset,
@@ -120,5 +120,6 @@ if __name__ == "__main__":
             print(f"New best model saved: {best_ckpt}")
 
     print(f"Training finished. Best F1: {best_score:.4f}")
+
 
        
