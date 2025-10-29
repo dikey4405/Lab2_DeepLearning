@@ -81,11 +81,9 @@ if __name__ == "__main__":
         current_score = scores[best_score_name]
         if current_score > best_score:
             best_score = current_score
-            torch.save(
-                model.state_dict(),
-                "checkpoint/resnet/best_model.pth"
-            )
+    
 
 
        
+
 
