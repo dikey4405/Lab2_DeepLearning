@@ -3,7 +3,7 @@ import torch
 from torch.utils.data import DataLoader
 from torch import nn, optim
 import numpy as np
-from sklearn.metrics import precision_score, recall_score, f1_score
+from sklearn.metrics import precision_score, recall_score, f1_score, accuracy
 from model.lenet import LeNet
 
 def evaluate(dataloader: DataLoader, model = nn.Module) -> dict:
@@ -126,6 +126,7 @@ if __name__ == "__main__":
 
 
        
+
 
 
 
