@@ -10,7 +10,7 @@ class ResidualBlock(nn.Module):
         self.conv1 = nn.Conv2d(
             in_channels=in_channels,
             out_channels=out_channels,
-            kernel_size=(3,3),
+            kernel_size=3,
             stride=stride,
             padding=1,
             bias=False
@@ -21,7 +21,7 @@ class ResidualBlock(nn.Module):
         self.conv2 = nn.Conv2d(
             in_channels=out_channels,
             out_channels=out_channels,
-            kernel_size=(3,3),
+            kernel_size=3,
             stride=1,
             padding=1,
             bias=False
@@ -35,7 +35,7 @@ class ResidualBlock(nn.Module):
                 nn.Conv2d(
                     in_channels=in_channels,
                     out_channels=out_channels,
-                    kernel_size=(1,1),
+                    kernel_size=1,
                     stride=stride,
                     bias=False
                 ),
@@ -63,7 +63,7 @@ class ResNet(nn.Module):
         self.conv_1 = nn.Conv2d(
             in_channels=3,
             out_channels=64,
-            kernel_size=(7,7),
+            kernel_size=7,
             stride=2,
             padding=3
         )
@@ -71,7 +71,7 @@ class ResNet(nn.Module):
         self.bn1 = nn.BatchNorm2d(64)
 
         self.pooling_1 = nn.MaxPool2d(
-            kernel_size=(3,3),
+            kernel_size=3,
             stride=2,
             padding=1
         )
@@ -111,6 +111,13 @@ class ResNet(nn.Module):
             in_features=512 * block.expansion,
             out_features=21
         )
+
+        for m in self.modules():
+            if isinstance(m, nn.Conv2d):
+                nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
+            elif isinstance(m, nn.BatchNorm2d):
+                nn.init.constant_(m.weight, 1)
+                nn.init.constant_(m.bias, 0)
     
     def _make_layer(self, block, out_channels, num_blocks, stride):
         layers = []
@@ -138,6 +145,7 @@ class ResNet(nn.Module):
         output = self.fc(output)
 
         return output
+
 
 
 
