@@ -3,7 +3,7 @@ import torch
 from torch.utils.data import DataLoader
 from torch import nn, optim
 import numpy as np
-from sklearn.metrics import precision_score, recall_score, f1_score
+from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score, confusion_matrix
 from model.googlenet import GoogLeNet
 
 def evaluate(dataloader: DataLoader, model = nn.Module) -> dict:
@@ -19,10 +19,31 @@ def evaluate(dataloader: DataLoader, model = nn.Module) -> dict:
         trues.extend(label.tolist())
 
     return {
+        "accuracy": accuracy_score(trues, predictions),
         "precision": precision_score(trues, predictions, average="macro", zero_division=0),
         "recall": recall_score(trues, predictions, average="macro", zero_division=0),
         "f1": f1_score(trues, predictions, average="macro", zero_division=0)
         }
+
+def compute_scores(y_true, y_pred) -> dict:
+    return {
+        "accuracy": accuracy_score(y_true, y_pred),
+        "precision": precision_score(y_true, y_pred, average="macro", zero_division=0),
+        "recall": recall_score(y_true, y_pred, average="macro", zero_division=0),
+        "f1": f1_score(y_true, y_pred, average="macro", zero_division=0)
+    }
+
+def evaluate_per_class(preds, labels, num_classes):
+    for cls in range(num_classes):
+        class_preds = [1 if p == cls else 0 for p in preds]
+        class_labels = [1 if l == cls else 0 for l in labels]
+
+        print(f"\n----- Evaluation Results for Class {cls} -----")
+        scores = compute_scores(class_labels, class_preds)
+        print(f"Accuracy: {scores['accuracy']}")
+        print(f"Precision: {scores['precision']}")
+        print(f"Recall: {scores['recall']}")
+        print(f"F1_Score: {scores['f1']}")
 
 if __name__ == "__main__":
 
@@ -31,7 +52,7 @@ if __name__ == "__main__":
 
     train_dataloader = DataLoader(
         dataset=train_dataset,
-        batch_size=32,
+        batch_size=16,
         shuffle=True,
         collate_fn=collate_fn
     )
@@ -39,11 +60,11 @@ if __name__ == "__main__":
     test_dataloader = DataLoader(
         dataset=test_dataset,
         batch_size=1,
-        shuffle=True,
+        shuffle=False,
         collate_fn=collate_fn
     )
 
-    model = GoogLeNet().to("cuda")
+    model = GoogLeNet(labels=21).to("cuda")
     loss_fn = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=1e-4)
 
@@ -85,12 +106,17 @@ if __name__ == "__main__":
                 model.state_dict(),
                 "checkpoint/googlenet/best_model.pth"
             )
+            print(f"---- Save best model with {best_score_name}: {best_score} ----")
+    print("---- Final evaluation ----")
+    all_preds = []
+    all_labels = []
+    model.eval()
+    for items in test_dataloader:
+        image: torch.Tensor = items["image"].to("cuda")
+        label: torch.Tensor = items["label"].to("cuda")
+        output: torch.Tensor = model(image)
+        output = torch.argmax(output, dim=-1)
+        all_preds.extend(output.tolist())
+        all_labels.extend(label.tolist())
 
-
-       
-
-
-
-
-
-
+    evaluate_per_class(all_preds, all_labels, num_classes=21)
