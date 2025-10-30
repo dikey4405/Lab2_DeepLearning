@@ -1,4 +1,4 @@
-from VinaFood_dataset import VinaFood, collate_fn
+from VinaFood_dataset import VinaFood, vinafood_collate_fn
 import torch
 from torch.utils.data import DataLoader
 from torch import nn, optim
@@ -120,3 +120,4 @@ if __name__ == "__main__":
         all_labels.extend(label.tolist())
 
     evaluate_per_class(all_preds, all_labels, num_classes=21)
+
