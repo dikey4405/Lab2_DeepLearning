@@ -10,7 +10,7 @@ def vinafood_collate_fn(batch):
     labels = torch.tensor(labels)
     return imgs, labels
 
-class VinaFood21_Dataset(Dataset):
+class VinaFood(Dataset):
     def __init__(self, root_dir, transform=None):
         self.root_dir = root_dir
         self.transform = transform
@@ -43,4 +43,5 @@ class VinaFood21_Dataset(Dataset):
                 samples.append((path, label))
 
         return samples, classes, cls_to_idx
+
 
