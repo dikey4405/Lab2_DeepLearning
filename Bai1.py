@@ -116,8 +116,8 @@ if __name__ == "__main__":
     all_labels = []
     model.eval()
     for items in test_dataloader:
-        image: torch.Tensor = items["image"].to("cpu")
-        label: torch.Tensor = items["label"].to("cpu")
+        image: torch.Tensor = items["image"].to("cuda")
+        label: torch.Tensor = items["label"].to("cuda")
         output: torch.Tensor = model(image)
         output = torch.argmax(output, dim=-1)
         all_preds.extend(output.tolist())
@@ -126,6 +126,7 @@ if __name__ == "__main__":
 
 
        
+
 
 
 
