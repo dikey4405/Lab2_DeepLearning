@@ -6,6 +6,7 @@ from torchvision import transforms
 import numpy as np
 from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score, confusion_matrix
 from model.googlenet import GoogLeNet
+import os
 
 def evaluate(dataloader: DataLoader, model: nn.Module) -> dict:
     model.eval()
@@ -134,6 +135,7 @@ if __name__ == "__main__":
             all_labels.extend(labels.tolist())
 
     evaluate_per_class(all_preds, all_labels, num_classes=21)
+
 
 
 
