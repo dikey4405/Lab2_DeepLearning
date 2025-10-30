@@ -3,7 +3,7 @@ from PIL import Image
 import torch
 from torch.utils.data import Dataset
 
-def vinafood_collate_fn(batch):
+def collate_fn(batch):
     batch = [b for b in batch if b[0] is not None]
     imgs, labels = zip(*batch)
     imgs = torch.stack(imgs)
@@ -43,5 +43,6 @@ class VinaFood(Dataset):
                 samples.append((path, label))
 
         return samples, classes, cls_to_idx
+
 
 
