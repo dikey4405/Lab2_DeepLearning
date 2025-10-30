@@ -2,6 +2,7 @@ from VinaFood_dataset import VinaFood, collate_fn
 import torch
 from torch.utils.data import DataLoader
 from torch import nn, optim
+from torchvision import transforms
 import numpy as np
 from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score, confusion_matrix
 from model.googlenet import GoogLeNet
@@ -54,6 +55,11 @@ def evaluate_per_class(preds, labels, num_classes):
 # Training Script
 # ===============================
 if __name__ == "__main__":
+
+    transform = transforms.Compose([
+        transforms.Resize((224, 224)),
+        transforms.ToTensor()
+    ])
     # Dataset path
     train_dataset = VinaFood("/kaggle/input/dataset-for-lab2/VinaFood21/train")
     test_dataset  = VinaFood("/kaggle/input/dataset-for-lab2/VinaFood21/test")
@@ -128,6 +134,7 @@ if __name__ == "__main__":
             all_labels.extend(labels.tolist())
 
     evaluate_per_class(all_preds, all_labels, num_classes=21)
+
 
 
 
