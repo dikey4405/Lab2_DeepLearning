@@ -8,13 +8,12 @@ def collate_fn(batch):
     imgs, labels = zip(*batch)
     imgs = torch.stack(imgs)
     labels = torch.tensor(labels)
-    return imgs, labels
+    return {"image": imgs, "label": labels}
 
 class VinaFood(Dataset):
     def __init__(self, root_dir, transform=None):
         self.root_dir = root_dir
         self.transform = transform
-
         self.samples, self.classes, self.class_to_idx = self.load_data()
 
     def __len__(self):
@@ -28,7 +27,6 @@ class VinaFood(Dataset):
             img = self.transform(img)
 
         return img, label
-
 
     def load_data(self):
         samples = []
