@@ -61,8 +61,8 @@ if __name__ == "__main__":
         transforms.ToTensor()
     ])
     # Dataset path
-    train_dataset = VinaFood("/kaggle/input/dataset-for-lab2/VinaFood21/train")
-    test_dataset  = VinaFood("/kaggle/input/dataset-for-lab2/VinaFood21/test")
+    train_dataset = VinaFood("/kaggle/input/dataset-for-lab2/VinaFood21/train", transform = transform)
+    test_dataset  = VinaFood("/kaggle/input/dataset-for-lab2/VinaFood21/test", transform = transform)
 
     train_dataloader = DataLoader(
         dataset=train_dataset,
@@ -134,6 +134,7 @@ if __name__ == "__main__":
             all_labels.extend(labels.tolist())
 
     evaluate_per_class(all_preds, all_labels, num_classes=21)
+
 
 
 
