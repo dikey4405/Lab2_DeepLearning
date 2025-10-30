@@ -23,6 +23,25 @@ def evaluate(dataloader: DataLoader, model = nn.Module) -> dict:
         "recall": recall_score(trues, predictions, average="macro", zero_division=0),
         "f1": f1_score(trues, predictions, average="macro", zero_division=0)
         }
+def compute_scores(y_true, y_pred) -> dict:
+    return {
+        "accuracy": accuracy_score(y_true, y_pred),
+        "precision": precision_score(y_true, y_pred, average="macro", zero_division=0),
+        "recall": recall_score(y_true, y_pred, average="macro", zero_division=0),
+        "f1": f1_score(y_true, y_pred, average="macro", zero_division=0)
+    }
+
+def evaluate_per_number(preds, labels):
+    for number in range(10):
+        number_preds = [1 if p == number else 0 for p in preds]
+        number_labels = [1 if l == number else 0 for l in labels]
+
+        print(f"\n----- Evaluation Results for Number -----")
+        compute_scores(number_preds, number_labels)
+        print("F1_Scores for number {number}:", f1_score(number_labels, number_preds, average="macro", zero_division=0))
+        cm = confusion_matrix(labels, preds)
+        print("Confusion Matrix:")
+        print(np.array2string(cm, separator=", "))
 
 if __name__ == "__main__":
 
@@ -92,9 +111,22 @@ if __name__ == "__main__":
                 model.state_dict(),
                 "checkpoint/lenet/best_model.pth"
             )
+    print("---- Final evaluation ----")
+    all_preds = []
+    all_labels = []
+    model.eval()
+    for items in test_dataloader:
+        image: torch.Tensor = items["image"].to("cpu")
+        label: torch.Tensor = items["label"].to("cpu")
+        output: torch.Tensor = model(image)
+        output = torch.argmax(output, dim=-1)
+        all_preds.extend(output.tolist())
+        all_labels.extend(label.tolist())
+    evaluate_per_number(all_preds, all_labels)
 
 
        
+
 
 
 
