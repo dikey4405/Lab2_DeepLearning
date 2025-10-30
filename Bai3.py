@@ -65,13 +65,13 @@ if __name__ == "__main__":
     test_dataloader = DataLoader(
         dataset=test_dataset,
         batch_size=1,
-        shuffle=True,
+        shuffle=False,
         collate_fn=collate_fn
     )
 
     model = ResNet(block=ResidualBlock, num_blocks=[2, 2, 2, 2], num_classes=21).to("cuda")
     loss_fn = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(model.parameters(), lr=0.001)
+    optimizer = optim.Adam(model.parameters(), lr=1e-4)
 
     num_epochs = 10
     best_score = 0
@@ -127,6 +127,7 @@ if __name__ == "__main__":
 
 
        
+
 
 
 
