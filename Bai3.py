@@ -1,5 +1,6 @@
 from VinaFood_dataset import VinaFood, collate_fn
 import torch
+from torchvision import transforms
 from torch.utils.data import DataLoader
 from torch import nn, optim
 import numpy as np
@@ -127,6 +128,7 @@ if __name__ == "__main__":
 
 
        
+
 
 
 
