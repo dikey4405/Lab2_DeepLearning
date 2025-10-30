@@ -31,7 +31,7 @@ if __name__ == "__main__":
 
     train_dataloader = DataLoader(
         dataset=train_dataset,
-        batch_size=16,
+        batch_size=32,
         shuffle=True,
         collate_fn=collate_fn
     )
@@ -45,7 +45,7 @@ if __name__ == "__main__":
 
     model = GoogLeNet().to("cuda")
     loss_fn = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(model.parameters(), lr=0.01)
+    optimizer = optim.Adam(model.parameters(), lr=1e-4)
 
     num_epochs = 10
     best_score = 0
@@ -88,6 +88,7 @@ if __name__ == "__main__":
 
 
        
+
 
 
 
