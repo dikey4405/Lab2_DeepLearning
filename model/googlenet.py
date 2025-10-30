@@ -135,7 +135,7 @@ class GoogLeNet(nn.Module):
         x = self.pooling_1(x)
 
         x = self.conv_2_1(x)
-        x = self.conv_2_2(x))
+        x = self.conv_2_2(x)
         x = self.pooling_2(x)
 
         x = self.inteption_3a(x)
@@ -158,3 +158,4 @@ class GoogLeNet(nn.Module):
         x = self.linear(x)
 
         return x
+
