@@ -1,12 +1,12 @@
 from VinaFood_dataset import VinaFood, collate_fn
 import torch
+from torchvision import transforms
 from torch.utils.data import DataLoader
 from torch import nn, optim
 import numpy as np
 from sklearn.metrics import precision_score, recall_score, f1_score
 from model.pretrained_resnet import PretrainedResnet
 import os
-
 
 def evaluate(dataloader: DataLoader, model: nn.Module, device: torch.device) -> dict:
     model.eval()
@@ -26,13 +26,37 @@ def evaluate(dataloader: DataLoader, model: nn.Module, device: torch.device) -> 
         "recall": recall_score(trues, predictions, average="macro", zero_division=0),
         "f1": f1_score(trues, predictions, average="macro", zero_division=0)
     }
+    
+def compute_scores(y_true, y_pred) -> dict:
+    return {
+        "accuracy": accuracy_score(y_true, y_pred),
+        "precision": precision_score(y_true, y_pred, average="macro", zero_division=0),
+        "recall": recall_score(y_true, y_pred, average="macro", zero_division=0),
+        "f1": f1_score(y_true, y_pred, average="macro", zero_division=0)
+    }
 
+def evaluate_per_class(preds, labels, num_classes):
+    for cls in range(num_classes):
+        class_preds = [1 if p == cls else 0 for p in preds]
+        class_labels = [1 if l == cls else 0 for l in labels]
+
+        print(f"\n----- Evaluation Results for Class {cls} -----")
+        scores = compute_scores(class_labels, class_preds)
+        print(f"Accuracy: {scores['accuracy']:.4f}")
+        print(f"Precision: {scores['precision']:.4f}")
+        print(f"Recall: {scores['recall']:.4f}")
+        print(f"F1_Score: {scores['f1']:.4f}")
 
 if __name__ == "__main__":
 
+    transform = transforms.Compose([
+        transforms.Resize((224, 224)),
+        transforms.ToTensor()
+    ])
+
     # Use local dataset paths (adjust if running on Kaggle)
-    train_dataset = VinaFood("/kaggle/input/dataset-for-lab2/VinaFood21/train")
-    test_dataset = VinaFood("/kaggle/input/dataset-for-lab2/VinaFood21/test")
+    train_dataset = VinaFood("/kaggle/input/dataset-for-lab2/VinaFood21/train", transform = transform)
+    test_dataset = VinaFood("/kaggle/input/dataset-for-lab2/VinaFood21/test", transform = transform)
 
     train_dataloader = DataLoader(
         dataset=train_dataset,
@@ -123,3 +147,4 @@ if __name__ == "__main__":
 
 
        
+
