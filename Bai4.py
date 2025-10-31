@@ -95,10 +95,9 @@ if __name__ == "__main__":
     scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=7, gamma=0.1)
 
     num_epochs = 10
-    best_score = 0.0
-    best_ckpt = None
-    out_dir = "checkpoint/bai4"
-    os.makedirs(out_dir, exist_ok=True)
+    best_score = 0
+    best_score_name = "f1"
+    best_model_path = "best_resnet.pth"
 
     for epoch in range(num_epochs):
         losses = []
@@ -134,17 +133,28 @@ if __name__ == "__main__":
         current_score = scores["f1"]
         if current_score > best_score:
             best_score = current_score
-            best_ckpt = os.path.join(out_dir, f"best_epoch_{epoch+1}_f1_{best_score:.4f}.pth")
-            torch.save({
-                "epoch": epoch + 1,
-                "model_state_dict": model.state_dict(),
-                "optimizer_state_dict": optimizer.state_dict(),
-                "f1": best_score,
-            }, best_ckpt)
-            print(f"New best model saved: {best_ckpt}")
+            torch.save(model.state_dict(), best_model_path)
+            print(f"\t Saved best model with F1 = {best_score:.4f}")
 
-    print(f"Training finished. Best F1: {best_score:.4f}")
+    print("\n---- Final Evaluation ----")
+
+    # Load lại model tốt nhất
+    model.load_state_dict(torch.load(best_model_path))
+    model.eval()
+
+    all_preds, all_labels = [], []
+    with torch.no_grad():
+        for items in test_dataloader:
+            images = items["image"].to("cuda")
+            labels = items["label"].to("cuda")
+            outputs = model(images)
+            preds = torch.argmax(outputs, dim=-1)
+            all_preds.extend(preds.tolist())
+            all_labels.extend(labels.tolist())
+
+    evaluate_per_class(all_preds, all_labels, num_classes=21)
 
 
        
+
 
