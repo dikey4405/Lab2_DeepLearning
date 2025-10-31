@@ -4,7 +4,7 @@ from torchvision import transforms
 from torch.utils.data import DataLoader
 from torch import nn, optim
 import numpy as np
-from sklearn.metrics import precision_score, recall_score, f1_score
+from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score
 from model.pretrained_resnet import PretrainedResnet
 import os
 
@@ -156,5 +156,6 @@ if __name__ == "__main__":
 
 
        
+
 
 
