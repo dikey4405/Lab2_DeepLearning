@@ -4,7 +4,7 @@ from torchvision import transforms
 from torch.utils.data import DataLoader
 from torch import nn, optim
 import numpy as np
-from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score, confusion_matrix
+from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score
 from model.RestNet import ResNet, ResidualBlock
 import os
 
@@ -12,19 +12,20 @@ def evaluate(dataloader: DataLoader, model = nn.Module) -> dict:
     model.eval()
     predictions = []
     trues = []
-    for items in dataloader:
-        image: torch.Tensor = items["image"].to("cuda")
-        label: torch.Tensor = items["label"].to("cuda")
-        output: torch.Tensor = model(image)
-        output = torch.argmax(output, dim=-1)
-        predictions.extend(output.tolist())
-        trues.extend(label.tolist())
+    with torch.no_grad():
+        for items in dataloader:
+            image: torch.Tensor = items["image"].to("cuda")
+            label: torch.Tensor = items["label"].to("cuda")
+            output: torch.Tensor = model(image)
+            output = torch.argmax(output, dim=-1)
+            predictions.extend(output.tolist())
+            trues.extend(label.tolist())
 
     return {
         "precision": precision_score(trues, predictions, average="macro", zero_division=0),
         "recall": recall_score(trues, predictions, average="macro", zero_division=0),
         "f1": f1_score(trues, predictions, average="macro", zero_division=0)
-        }
+    }
 
 def compute_scores(y_true, y_pred) -> dict:
     return {
@@ -46,6 +47,7 @@ def evaluate_per_class(preds, labels, num_classes):
         print(f"Recall: {scores['recall']:.4f}")
         print(f"F1_Score: {scores['f1']:.4f}")
 
+
 if __name__ == "__main__":
 
     transform = transforms.Compose([
@@ -53,22 +55,11 @@ if __name__ == "__main__":
         transforms.ToTensor()
     ])
 
-    train_dataset = VinaFood("/kaggle/input/dataset-for-lab2/VinaFood21/train", transform = transform)
-    test_dataset  = VinaFood("/kaggle/input/dataset-for-lab2/VinaFood21/test", transform = transform)
+    train_dataset = VinaFood("/kaggle/input/dataset-for-lab2/VinaFood21/train", transform=transform)
+    test_dataset  = VinaFood("/kaggle/input/dataset-for-lab2/VinaFood21/test", transform=transform)
 
-    train_dataloader = DataLoader(
-        dataset=train_dataset,
-        batch_size=16,
-        shuffle=True,
-        collate_fn=collate_fn
-    )
-
-    test_dataloader = DataLoader(
-        dataset=test_dataset,
-        batch_size=1,
-        shuffle=False,
-        collate_fn=collate_fn
-    )
+    train_dataloader = DataLoader(train_dataset, batch_size=16, shuffle=True, collate_fn=collate_fn)
+    test_dataloader  = DataLoader(test_dataset, batch_size=1, shuffle=False, collate_fn=collate_fn)
 
     model = ResNet(block=ResidualBlock, num_blocks=[2, 2, 2, 2], num_classes=21).to("cuda")
     loss_fn = nn.CrossEntropyLoss()
@@ -77,42 +68,48 @@ if __name__ == "__main__":
     num_epochs = 10
     best_score = 0
     best_score_name = "f1"
+    best_model_path = "best_resnet.pth"
+
     for epoch in range(num_epochs):
         losses = []
         print(f"Epoch {epoch+1}/{num_epochs}")
         model.train()
 
         for items in train_dataloader:
-            images: torch.Tensor = items["image"].to("cuda")
-            labels: torch.Tensor = items["label"].to("cuda")
+            images = items["image"].to("cuda")
+            labels = items["label"].to("cuda")
 
-           # forward pass
             outputs = model(images)
             loss = loss_fn(outputs, labels)
 
-            # backward pass
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-
-            # append loss for later verbose
             losses.append(loss.item())
 
-        print (f"\t- loss: {np.array(losses).mean()}")
+        print(f"\t- loss: {np.mean(losses):.4f}")
 
         scores = evaluate(test_dataloader, model)
-
         for score_name in scores:
-            print(f"\t-{score_name}: {scores[score_name]}")
+            print(f"\t- {score_name}: {scores[score_name]:.4f}")
         
+        # Lưu mô hình nếu F1 tốt nhất
         current_score = scores[best_score_name]
         if current_score > best_score:
             best_score = current_score
+            torch.save(model.state_dict(), best_model_path)
+            print(f"\t Saved best model with F1 = {best_score:.4f}")
 
+    # =========================
+    #  Đánh giá mô hình tốt nhất
+    # =========================
     print("\n---- Final Evaluation ----")
-    all_preds, all_labels = [], []
+
+    # Load lại model tốt nhất
+    model.load_state_dict(torch.load(best_model_path))
     model.eval()
 
+    all_preds, all_labels = [], []
     with torch.no_grad():
         for items in test_dataloader:
             images = items["image"].to("cuda")
@@ -123,14 +120,3 @@ if __name__ == "__main__":
             all_labels.extend(labels.tolist())
 
     evaluate_per_class(all_preds, all_labels, num_classes=21)
-
-    
-
-
-       
-
-
-
-
-
-
